@@ -7,45 +7,42 @@ import pandas as pd
 from tkinter import Tk
 from tkinter.filedialog import askopenfilename
 
-#hide root window
+#def getFFT():
+ #hide root window
 root = Tk()
 root.withdraw()
 
 #open file
-filename =  askopenfilename(initialdir = "/",title = "Select file",filetypes = (("csv files","*.csv"),("all files","*.*")))
+filename = askopenfilename(initialdir = "/",title = "Select file",filetypes = (("csv files","*.csv"),("all files","*.*")))
 print("Loaded file: " + filename)
 
-#Get dataframe from csv
-dataFrame = pd.read_csv(filename,sep=';',header=3,index_col=0,parse_dates=True)
-dataFrame.iloc[:,0] = dataFrame.iloc[:,0].interpolate()
+#Get data from csv
+dataFrame = pd.read_csv(filename,sep=';',header=3,index_col=False,usecols=[0,1])
+x = dataFrame.iloc[:,0]
+x = pd.to_datetime(x)
+y = dataFrame.iloc[:,1]
 
 #plot original signal
-plt.figure(figsize=(15,7))
-dataFrame.iloc[:,0].plot()
+plt.figure(figsize=(12,5))
+plt.plot(x,y)
 plt.title('Original data')
-plt.ylabel('beam loss current')
+plt.xlabel('time [s]')
+plt.show()
 
 #create hanning window
-hann = np.hanning(len(dataFrame.beamLossCurrent.values))
-Y = np.fft.fft(hann*dataFrame.iloc[:,0].values)
+hann = np.hanning(len(y.values))
+Y_f = np.fft.fft(hann*y.values)
 
 #get sampling frequency
-td = dataFrame.index[1]-dataFrame.index[0]
+td = x[1]-x[0]
 sampFreq = 1/(td.microseconds/1000000)
-N = int(len(Y)/2+1)
+N = int(len(Y_f)/2+1)
 
 #create x-axis vector
-X = np.linspace(0,sampFreq/2,N, endpoint=True)
+X_f = np.linspace(0,sampFreq/2,N, endpoint=True)
 
 #plot FFT
-plt.figure(figsize=(15,7))
-plt.plot(X,2.0*np.abs(Y[:N])/N)
+plt.figure(figsize=(12,5))
+plt.plot(X_f,2.0*np.abs(Y_f[:N])/N)
 plt.xlabel('Frequency ($Hz$)')
-plt.ylabel('beam loss current')
-
-#plot in seconds
-Xp = 1.0/X
-plt.figure(figsize=(15,7))
-plt.plot(Xp,2.0*np.abs(Y[:N])/N)
-plt.xlabel('Period ($s$)')
-plt.ylabel('beam loss current')
+plt.show()
