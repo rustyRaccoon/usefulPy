@@ -1,2 +1,3 @@
 # usefulPy
 Collection of small useful python scripts for various uses
+Untested as of yet, I guess I should do that at some point...
